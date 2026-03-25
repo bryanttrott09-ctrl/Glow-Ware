@@ -1169,12 +1169,6 @@ end)
 	        ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Replication"):WaitForChild("Fighter"):WaitForChild("SetControls"):FireServer("VR")
 	    end,
 	})
-		SpooferTab:CreateButton({
-	    Name = "Set Device As A Calculator",
-	    Callback = function()
-	        ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Replication"):WaitForChild("Fighter"):WaitForChild("SetControls"):FireServer("Calculator")
-	    end,
-	})
 	SpooferTab:CreateInput({
 		Name = "Username",
 		PlaceholderText = "Enter fake username",
