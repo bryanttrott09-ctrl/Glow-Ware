@@ -63,7 +63,7 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 	local DrawingCircle
 	local InfiniteJumpConnection
 	
-	-- Aimbot Logic
+-- Aimbot Logic
 	
 	if Drawing then
 		DrawingCircle = Drawing.new("Circle")
@@ -80,31 +80,31 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 		end))
 	end
 	
-    local function isValidTarget(player)
-	if player == LocalPlayer then return false end
-	if not player.Character then return false end
-	if not player.Character:FindFirstChild("Humanoid") then return false end
-	if player.Character.Humanoid.Health <= 0 then return false end
-	
-	-- Add distance check
-	if Config.MaxDistance then
-		local character = player.Character
-		local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-		local localCharacter = LocalPlayer.Character
-		local localHumanoidRootPart = localCharacter and localCharacter:FindFirstChild("HumanoidRootPart")
+	local function isValidTarget(player)
+		if player == LocalPlayer then return false end
+		if not player.Character then return false end
+		if not player.Character:FindFirstChild("Humanoid") then return false end
+		if player.Character.Humanoid.Health <= 0 then return false end
 		
-		if humanoidRootPart and localHumanoidRootPart then
-			local distance = (humanoidRootPart.Position - localHumanoidRootPart.Position).Magnitude
-			if distance > Config.MaxDistance then
+		-- ADD THIS DISTANCE CHECK CODE
+		if Config.MaxDistance then
+			local character = player.Character
+			local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+			local localCharacter = LocalPlayer.Character
+			local localHumanoidRootPart = localCharacter and localCharacter:FindFirstChild("HumanoidRootPart")
+			
+			if humanoidRootPart and localHumanoidRootPart then
+				local distance = (humanoidRootPart.Position - localHumanoidRootPart.Position).Magnitude
+				if distance > Config.MaxDistance then
+					return false
+				end
+			else
 				return false
 			end
-		else
-			return false
 		end
+		
+		return true
 	end
-	
-	return true
-end
 	
 	local function ClearHighlights()
 		for _, player in pairs(Players:GetPlayers()) do
@@ -184,7 +184,7 @@ end
 	    local center = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
 	
 	    for _, plr in pairs(Players:GetPlayers()) do
-	        if plr ~= LocalPlayer and plr.Character then
+	        if plr ~= LocalPlayer and plr.Character and isValidTarget(plr) then -- UPDATED: Added isValidTarget check
 	            for _, partName in ipairs(Config.AimbotPart) do
 	                local part = plr.Character:FindFirstChild(partName)
 	                if part then
@@ -714,19 +714,18 @@ end
 			Config.Sensitivity = Value
 		end,
 	})
- local Slider = AimbotTab:CreateSlider({
-   Name = "Aimbot Distance",
-   Range = {0, 2500},
-   Increment = 25,
-   Suffix = "studs",
-   CurrentValue = 250,
-   Flag = "AimbotDistance1",
-   Callback = function(Value)
-   -- The function that takes place when the slider changes
-   -- The variable (Value) is a number that correlates to the value the slider is currently at
-   Config.MaxDistance = Value
-   end,
-})
+-- ADD THIS SLIDER CODE WHERE YOU CREATE YOUR UI ELEMENTS
+	local DistanceSlider = AimbotTab:CreateSlider({
+	   Name = "Max Aimbot Distance",
+	   Range = {0, 5000},
+	   Increment = 10,
+	   Suffix = " studs",
+	   CurrentValue = 200,
+	   Flag = "MaxDistance",
+	   Callback = function(Value)
+	       Config.MaxDistance = Value
+	   end,
+	})
 	local AimbotBind = AimbotTab:CreateKeybind({
 		Name = "Bind Aimbot",
 		CurrentKeybind = "F15",
@@ -1167,6 +1166,12 @@ end)
 	    Name = "Set Device As A VR",
 	    Callback = function()
 	        ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Replication"):WaitForChild("Fighter"):WaitForChild("SetControls"):FireServer("VR")
+	    end,
+	})
+		SpooferTab:CreateButton({
+	    Name = "Set Device As A Calculator",
+	    Callback = function()
+	        ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Replication"):WaitForChild("Fighter"):WaitForChild("SetControls"):FireServer("Calculator")
 	    end,
 	})
 	SpooferTab:CreateInput({
