@@ -772,17 +772,18 @@ local Toggle = VisualsTab:CreateToggle({
            local ReplicatedStorage = game:GetService("ReplicatedStorage")
            local HttpService = game:GetService("HttpService")
            
-           pcall(function()
-               local replicatedFirst = game:GetService("ReplicatedFirst")
-               for _, child in pairs(replicatedFirst:GetChildren()) do
-                   if child:IsA("LocalScript") then 
-                       child.Enabled = false 
-                       child:Destroy() 
-                   end
-               end
-               local analytics = replicatedFirst:FindFirstChild("AnalyticsPipelineController")
-               if analytics then analytics:Destroy() end
-           end)
+           -- REMOVED: This section was disabling scripts that might include damage calculations
+           -- pcall(function()
+           --     local replicatedFirst = game:GetService("ReplicatedFirst")
+           --     for _, child in pairs(replicatedFirst:GetChildren()) do
+           --         if child:IsA("LocalScript") then 
+           --             child.Enabled = false 
+           --             child:Destroy() 
+           --         end
+           --     end
+           --     local analytics = replicatedFirst:FindFirstChild("AnalyticsPipelineController")
+           --     if analytics then analytics:Destroy() end
+           -- end)
            
            local player = Players.LocalPlayer
            local playerScripts = player.PlayerScripts
@@ -951,6 +952,7 @@ local Toggle = VisualsTab:CreateToggle({
                        end
                        local args = {...}
                        
+                       -- MODIFIED: Allow damage-related remote calls to pass through normally
                        if useItemRemote and self == useItemRemote then
                            local objectID = args[1]
                            if FighterController then
@@ -966,6 +968,8 @@ local Toggle = VisualsTab:CreateToggle({
                                    end
                                end)
                            end
+                           -- Let damage-related calls pass through normally
+                           return oldNamecall(self, ...)
                        end
                        
                        if self == equipRemote then
@@ -1575,12 +1579,7 @@ end)
 	        ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Replication"):WaitForChild("Fighter"):WaitForChild("SetControls"):FireServer("VR")
 	    end,
 	})
-		SpooferTab:CreateButton({
-	    Name = "Set Device As A Calculator",
-	    Callback = function()
-	        ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Replication"):WaitForChild("Fighter"):WaitForChild("SetControls"):FireServer("Calculator")
-	    end,
-	})
+
 	SpooferTab:CreateInput({
 		Name = "Username",
 		PlaceholderText = "Enter fake username",
@@ -1710,13 +1709,3 @@ end)
 	        LocalPlayer:Kick("Game Closed By Script")
 	    end,
 	})
-
--- Info Section
-Tab:CreateSection("Information")
-Tab:CreateLabel("This Unlock all allows you to equip any cosmetic in the game, even ones you don't own.")
-Tab:CreateLabel("Your cosmetic choices will be saved automatically.")
-
--- Credits
-Tab:CreateSection("Credits")
-Tab:CreateLabel("Script by darkrs_11")
-Tab:CreateLabel("UI by Rayfield")
