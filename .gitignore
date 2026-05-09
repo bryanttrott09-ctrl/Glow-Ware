@@ -12,7 +12,7 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 	})
     local Config = {
 		AimbotToggle = false,
-	        SilentAim = false,
+	    SilentAim = false,
 	 	AimbotPart = {"Head"},
 		RightMouseDown = false,
 		FOV = 150,
