@@ -256,14 +256,19 @@ function Library:MakeDraggable(Instance, Cutoff, IsWindow)
                                 BackgroundTransparency = 1,
                                 Active = false,
                                 ZIndex = 100000,
-                                Parent = ScreenGui
+                                Parent = Library.ScreenGui -- Fixed un-scoped container reference
                             })
 
-                            Library:Create("UIStroke", {
-                                Color = Color3.fromRGB(255, 255, 255),
+                            local Stroke = Library:Create("UIStroke", {
+                                Color = Library.AccentColor,
                                 Thickness = 1,
                                 ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
                                 Parent = Wireframe
+                            })
+                            
+                            -- Link to registry to dynamically track active dynamic theme swaps without erroring
+                            Library:AddToRegistry(Stroke, {
+                                Color = 'AccentColor'
                             })
                         end
                         
@@ -285,8 +290,8 @@ function Library:MakeDraggable(Instance, Cutoff, IsWindow)
             EndedConn = InputService.InputEnded:Connect(function(EndInput)
                 if EndInput == Input or EndInput.UserInputType == Enum.UserInputType.Touch then
                     Dragging = false
-                    ChangedConn:Disconnect()
-                    EndedConn:Disconnect()
+                    if ChangedConn then ChangedConn:Disconnect() end
+                    if EndedConn then EndedConn:Disconnect() end
                     
                     if IsWindow and Library.WireframeDrag and HasMoved and Wireframe then
                         Instance.Position = Wireframe.Position
@@ -365,13 +370,16 @@ function Library:MakeResizable(Instance, MinSize, MaxSize)
                         BackgroundTransparency = 1,
                         Active = false,
                         ZIndex = 100000,
-                        Parent = ScreenGui,
+                        Parent = Library.ScreenGui, -- Fixed container dependency
                     })
-                    Library:Create('UIStroke', {
-                        Color = Color3.fromRGB(255, 255, 255),
+                    local Stroke = Library:Create('UIStroke', {
+                        Color = Library.AccentColor,
                         Thickness = 1,
                         ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
                         Parent = Wireframe,
+                    })
+                    Library:AddToRegistry(Stroke, {
+                        Color = 'AccentColor'
                     })
                 end
                 Wireframe.Size = newSize
@@ -386,8 +394,8 @@ function Library:MakeResizable(Instance, MinSize, MaxSize)
                 return
             end
 
-            ChangedConn:Disconnect()
-            EndedConn:Disconnect()
+            if ChangedConn then ChangedConn:Disconnect() end
+            if EndedConn then EndedConn:Disconnect() end
 
             if Library.WireframeDrag and HasMoved and Wireframe then
                 Instance.Size = Wireframe.Size
