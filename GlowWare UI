@@ -260,7 +260,7 @@ function Library:MakeDraggable(Instance, Cutoff, IsWindow)
                             })
 
                             Library:Create("UIStroke", {
-                                Color = Color3.fromRGB(255, 255, 255),
+                                Color = Library.AccentColor, -- Updated to accent color
                                 Thickness = 1,
                                 ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
                                 Parent = Wireframe
@@ -368,7 +368,7 @@ function Library:MakeResizable(Instance, MinSize, MaxSize)
                         Parent = ScreenGui,
                     })
                     Library:Create('UIStroke', {
-                        Color = Color3.fromRGB(255, 255, 255),
+                        Color = Library.AccentColor, -- Updated to accent color
                         Thickness = 1,
                         ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
                         Parent = Wireframe,
