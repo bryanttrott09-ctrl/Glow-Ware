@@ -256,17 +256,17 @@ function Library:MakeDraggable(Instance, Cutoff, IsWindow)
                                 BackgroundTransparency = 1,
                                 Active = false,
                                 ZIndex = 100000,
-                                Parent = Library.ScreenGui -- Fixed un-scoped container reference
+                                Parent = Library.ScreenGui
                             })
 
                             local Stroke = Library:Create("UIStroke", {
-                                Color = Library.AccentColor,
+                                Color = Library.AccentColor, -- Dynamic Accent Color
                                 Thickness = 1,
                                 ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
                                 Parent = Wireframe
                             })
                             
-                            -- Link to registry to dynamically track active dynamic theme swaps without erroring
+                            -- Registers the stroke so it tracks active theme color shifts instantly
                             Library:AddToRegistry(Stroke, {
                                 Color = 'AccentColor'
                             })
@@ -370,10 +370,10 @@ function Library:MakeResizable(Instance, MinSize, MaxSize)
                         BackgroundTransparency = 1,
                         Active = false,
                         ZIndex = 100000,
-                        Parent = Library.ScreenGui, -- Fixed container dependency
+                        Parent = Library.ScreenGui,
                     })
                     local Stroke = Library:Create('UIStroke', {
-                        Color = Library.AccentColor,
+                        Color = Library.AccentColor, -- Dynamic Accent Color
                         Thickness = 1,
                         ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
                         Parent = Wireframe,
