@@ -3292,7 +3292,7 @@ function Library:CreateWindow(...)
     });
     task.spawn(function()
         local success, info = pcall(function()
-            return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
+            return game:GetService("RIVALS"):GetProductInfo(game.PlaceId)
         end)
         if success and info and info.Name then
             MapNameLabel.Text = info.Name
