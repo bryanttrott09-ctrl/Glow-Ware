@@ -3298,15 +3298,16 @@ function Library:CreateWindow(...)
     Library:AddToRegistry(MapNameLabel, {
         TextColor3 = 'AccentColor';
     });
-local MapNameLabel = script.Parent -- Adjust this if the script isn't directly inside the Label
-
--- Force change the text immediately to wipe out the old value
-MapNameLabel.Text = "RIVALS (" .. tostring(game.PlaceId) .. ")"
-
--- Keep the spawn block just in case you are waiting for other UI components to load
-task.spawn(function()
-    MapNameLabel.Text = "RIVALS (" .. tostring(game.PlaceId) .. ")"
-end)
+    task.spawn(function()
+        local success, info = pcall(function()
+            return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
+        end)
+        if success and info and info.Name then
+            MapNameLabel.Text = info.Name
+        else
+            MapNameLabel.Text = game.Name or "Unknown Map"
+        end
+    end)
 
 
     local TabBarOuter = Library:Create('Frame', {
