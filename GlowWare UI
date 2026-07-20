@@ -3298,16 +3298,11 @@ function Library:CreateWindow(...)
     Library:AddToRegistry(MapNameLabel, {
         TextColor3 = 'AccentColor';
     });
+local MapNameLabel = script.Parent -- Adjust this path if your Label is located somewhere else
+
 task.spawn(function()
-    local success, info = pcall(function()
-        return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
-    end)
-    if success and info and info.Name then
-        -- This displays the game name followed by the Place ID (e.g., "RIVALS (17625359962)")
-        MapNameLabel.Text = info.Name .. " (" .. tostring(game.PlaceId) .. ")"
-    else
-        MapNameLabel.Text = (game.Name or "Unknown Map") .. " (" .. tostring(game.PlaceId) .. ")"
-    end
+    -- Sets the label text directly to "RIVALS" followed by the active Place ID
+    MapNameLabel.Text = "RIVALS (" .. tostring(game.PlaceId) .. ")"
 end)
 
 
