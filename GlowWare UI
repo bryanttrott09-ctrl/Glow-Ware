@@ -260,15 +260,15 @@ function Library:MakeDraggable(Instance, Cutoff, IsWindow)
                             })
 
                             local Stroke = Library:Create("UIStroke", {
-                                Color = Library.AccentColor, -- Dynamic Accent Color
+                                Color = Library.AccentColor,
                                 Thickness = 1,
                                 ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
                                 Parent = Wireframe
                             })
                             
-                            -- Registers the stroke so it tracks active theme color shifts instantly
+                            -- LinoriaLib uses 'Accent' as its theme registration key
                             Library:AddToRegistry(Stroke, {
-                                Color = 'AccentColor'
+                                Color = 'Accent'
                             })
                         end
                         
@@ -373,13 +373,13 @@ function Library:MakeResizable(Instance, MinSize, MaxSize)
                         Parent = Library.ScreenGui,
                     })
                     local Stroke = Library:Create('UIStroke', {
-                        Color = Library.AccentColor, -- Dynamic Accent Color
+                        Color = Library.AccentColor,
                         Thickness = 1,
                         ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
                         Parent = Wireframe,
                     })
                     Library:AddToRegistry(Stroke, {
-                        Color = 'AccentColor'
+                        Color = 'Accent'
                     })
                 end
                 Wireframe.Size = newSize
