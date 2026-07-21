@@ -3305,7 +3305,7 @@ function Library:CreateWindow(...)
         if success and info and info.Name then
             MapNameLabel.Text = info.Name
         else
-            MapNameLabel.Text = game.Name or "Unknown Map"
+            MapNameLabel.Text = game.Name or "RIVALS"
         end
     end)
 
