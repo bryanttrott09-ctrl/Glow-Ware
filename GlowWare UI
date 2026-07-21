@@ -3298,14 +3298,19 @@ function Library:CreateWindow(...)
     Library:AddToRegistry(MapNameLabel, {
         TextColor3 = 'AccentColor';
     });
-    task.spawn(function()
-local success, placeInfo = pcall(function()
-    return MarketplaceService:GetProductInfo(game.PlaceId)
-end)
+task.spawn(function()
+    if not MapNameLabel then return end
 
-if MapNameLabel then
+    -- Set the initial text
     MapNameLabel.Text = "RIVALS"
-end
+
+    -- Whenever the game tries to change the text, instantly set it back
+    MapNameLabel:GetPropertyChangedSignal("Text"):Connect(function()
+        if MapNameLabel.Text ~= "RIVALS" then
+            MapNameLabel.Text = "RIVALS"
+        end
+    end)
+end)
 
 
     local TabBarOuter = Library:Create('Frame', {
