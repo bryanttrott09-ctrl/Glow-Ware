@@ -3299,15 +3299,13 @@ function Library:CreateWindow(...)
         TextColor3 = 'AccentColor';
     });
     task.spawn(function()
-        local success, info = pcall(function()
-            return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
-        end)
-        if success and info and info.Name then
-            MapNameLabel.Text = info.Name
-        else
-            MapNameLabel.Text = game.Name or "RIVALS"
-        end
-    end)
+local success, placeInfo = pcall(function()
+    return MarketplaceService:GetProductInfo(game.PlaceId)
+end)
+
+if MapNameLabel then
+    MapNameLabel.Text = "RIVALS"
+end
 
 
     local TabBarOuter = Library:Create('Frame', {
