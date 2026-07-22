@@ -3302,7 +3302,7 @@ task.spawn(function()
     if not MapNameLabel then return end
 
     -- Set the initial text
-    MapNameLabel.Text = "RIVALS"
+    MapNameLabel.Text = "Basketball Legends"
 
     -- Whenever the game tries to change the text, instantly set it back
     MapNameLabel:GetPropertyChangedSignal("Text"):Connect(function()
