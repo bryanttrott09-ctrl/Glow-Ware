@@ -240,13 +240,15 @@ function Library:MakeDraggable(Instance, Cutoff, IsWindow)
             local Wireframe = nil
             local ChangedConn, EndedConn
 
-            -- Create the wireframe immediately upon clicking if enabled
+            -- Create the wireframe immediately upon clicking
             if IsWindow and Library.WireframeDrag then
                 Wireframe = Library:Create("Frame", {
                     Size = Instance.Size,
+                    SizeConstraint = Instance.SizeConstraint,
                     Position = Instance.Position,
                     AnchorPoint = Instance.AnchorPoint,
                     BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
                     Active = false,
                     ZIndex = 100000,
                     Parent = Library.ScreenGui
