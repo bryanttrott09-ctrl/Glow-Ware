@@ -226,84 +226,6 @@ function Library:CreateLabel(Properties, IsHud)
     return Library:Create(_Instance, Properties);
 end;
 
-function Library:MakeDraggable(Instance, Cutoff, IsWindow)
-    Instance.Active = true;
-    Instance.InputBegan:Connect(function(Input)
-        if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-            local StartPos = Instance.Position
-            local DragStart = Input.Position
-
-            if (DragStart.Y - Instance.AbsolutePosition.Y) > (Cutoff or 40) then
-                return
-            end
-
-            local Dragging = true
-            local Wireframe = nil
-            local ChangedConn, EndedConn
-
-            -- Create the wireframe immediately upon clicking
-            if IsWindow and Library.WireframeDrag then
-                Wireframe = Library:Create("Frame", {
-                    Size = Instance.Size,
-                    SizeConstraint = Instance.SizeConstraint,
-                    Position = Instance.Position,
-                    AnchorPoint = Instance.AnchorPoint,
-                    BackgroundTransparency = 1,
-                    BorderSizePixel = 0,
-                    Active = false,
-                    ZIndex = 100000,
-                    Parent = Library.ScreenGui
-                })
-
-                local Stroke = Library:Create("UIStroke", {
-                    Color = Library.AccentColor,
-                    Thickness = 1,
-                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                    Parent = Wireframe
-                })
-                
-                Library:AddToRegistry(Stroke, {
-                    Color = 'Accent'
-                })
-            end
-
-            ChangedConn = InputService.InputChanged:Connect(function(Change)
-                if Change.UserInputType == Enum.UserInputType.MouseMovement or Change == Input then
-                    local Delta = Change.Position - DragStart
-                    
-                    if IsWindow and Library.WireframeDrag then
-                        if Wireframe then
-                            Wireframe.Position = UDim2.new(
-                                StartPos.X.Scale, StartPos.X.Offset + Delta.X,
-                                StartPos.Y.Scale, StartPos.Y.Offset + Delta.Y
-                            )
-                        end
-                    else
-                        Instance.Position = UDim2.new(
-                            StartPos.X.Scale, StartPos.X.Offset + Delta.X,
-                            StartPos.Y.Scale, StartPos.Y.Offset + Delta.Y
-                        )
-                    end
-                end
-            end)
-
-            EndedConn = InputService.InputEnded:Connect(function(EndInput)
-                if EndInput == Input or EndInput.UserInputType == Enum.UserInputType.Touch then
-                    Dragging = false
-                    if ChangedConn then ChangedConn:Disconnect() end
-                    if EndedConn then EndedConn:Disconnect() end
-                    
-                    if IsWindow and Library.WireframeDrag and Wireframe then
-                        Instance.Position = Wireframe.Position
-                        Wireframe:Destroy()
-                        Wireframe = nil
-                    end
-                end
-            end)
-        end
-    end)
-end;
-
 function Library:MakeResizable(Instance, MinSize, MaxSize)
     MinSize = MinSize or Vector2.new(400, 300)
     MaxSize = MaxSize or Vector2.new(1400, 1000)
@@ -343,9 +265,34 @@ function Library:MakeResizable(Instance, MinSize, MaxSize)
 
         local StartSize = Instance.Size
         local DragStart = Input.Position
-        local HasMoved = false
         local Wireframe = nil
         local ChangedConn, EndedConn
+
+        -- Spawn wireframe immediately on click if enabled
+        if Library.WireframeDrag then
+            Wireframe = Library:Create('Frame', {
+                Size = Instance.Size,
+                SizeConstraint = Instance.SizeConstraint,
+                Position = Instance.Position,
+                AnchorPoint = Instance.AnchorPoint,
+                BackgroundTransparency = 1,
+                BorderSizePixel = 0,
+                Active = false,
+                ZIndex = 100000,
+                Parent = Library.ScreenGui,
+            })
+
+            local Stroke = Library:Create('UIStroke', {
+                Color = Library.AccentColor,
+                Thickness = 1,
+                ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                Parent = Wireframe,
+            })
+
+            Library:AddToRegistry(Stroke, {
+                Color = 'Accent'
+            })
+        end
 
         ChangedConn = InputService.InputChanged:Connect(function(Change)
             if Change.UserInputType ~= Enum.UserInputType.MouseMovement and Change ~= Input then
@@ -353,36 +300,15 @@ function Library:MakeResizable(Instance, MinSize, MaxSize)
             end
 
             local Delta = Change.Position - DragStart
-            if Delta.Magnitude <= 2 then return end
-            HasMoved = true
-
             local newW = math.clamp(StartSize.X.Offset + Delta.X, MinSize.X, MaxSize.X)
             local newH = math.clamp(StartSize.Y.Offset + Delta.Y, MinSize.Y, MaxSize.Y)
             local newSize = UDim2.fromOffset(newW, newH)
 
             if Library.WireframeDrag then
-                if not Wireframe then
-                    Wireframe = Library:Create('Frame', {
-                        Size = Instance.Size,
-                        Position = Instance.Position,
-                        AnchorPoint = Instance.AnchorPoint,
-                        BackgroundTransparency = 1,
-                        Active = false,
-                        ZIndex = 100000,
-                        Parent = Library.ScreenGui,
-                    })
-                    local Stroke = Library:Create('UIStroke', {
-                        Color = Library.AccentColor,
-                        Thickness = 1,
-                        ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                        Parent = Wireframe,
-                    })
-                    Library:AddToRegistry(Stroke, {
-                        Color = 'Accent'
-                    })
+                if Wireframe then
+                    Wireframe.Size = newSize
+                    Wireframe.Position = Instance.Position
                 end
-                Wireframe.Size = newSize
-                Wireframe.Position = Instance.Position
             else
                 Instance.Size = newSize
             end
@@ -396,9 +322,11 @@ function Library:MakeResizable(Instance, MinSize, MaxSize)
             if ChangedConn then ChangedConn:Disconnect() end
             if EndedConn then EndedConn:Disconnect() end
 
-            if Library.WireframeDrag and HasMoved and Wireframe then
+            -- Apply final size and destroy wireframe on release
+            if Library.WireframeDrag and Wireframe then
                 Instance.Size = Wireframe.Size
                 Wireframe:Destroy()
+                Wireframe = nil
             end
         end)
     end)
