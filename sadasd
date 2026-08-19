@@ -305,106 +305,66 @@ function Library:MakeDraggable(Instance, Cutoff, IsWindow)
     end)
 end;
 
-function Library:MakeResizable(Instance, MinSize, MaxSize)
-    MinSize = MinSize or Vector2.new(400, 300)
-    MaxSize = MaxSize or Vector2.new(1400, 1000)
+-- =========================================================================
+-- REPLACED RESIZE LOGIC
+-- =========================================================================
 
-    local Grip = Library:Create('TextButton', {
-        Name = 'ResizeGrip',
-        Text = '',
-        AutoButtonColor = false,
-        BackgroundTransparency = 1,
-        Size = UDim2.fromOffset(16, 16),
-        Position = UDim2.new(1, -4, 1, -4),
-        AnchorPoint = Vector2.new(1, 1),
-        ZIndex = 25,
-        Parent = Instance,
-    })
-
-    local GripIcon = Library:CreateLabel({
-        BackgroundTransparency = 1,
-        Size = UDim2.fromOffset(16, 16),
-        Position = UDim2.new(1, 0, 1, 0),
-        AnchorPoint = Vector2.new(1, 1),
-        Text = '◢',
-        TextColor3 = Library.OutlineColor,
-        TextSize = Library.FontSize + 2,
-        ZIndex = 26,
-        Parent = Grip,
-    })
-    Library:AddToRegistry(GripIcon, {
-        TextColor3 = 'OutlineColor',
-    })
-
-    Grip.InputBegan:Connect(function(Input)
-        if Input.UserInputType ~= Enum.UserInputType.MouseButton1
-            and Input.UserInputType ~= Enum.UserInputType.Touch then
-            return
+-- 1. Groupbox Auto-Resizing
+function GroupboxFuncs:Resize()
+    local totalHeight = 0
+    for _, child in ipairs(Groupbox.Container:GetChildren()) do
+        if child:IsA("GuiObject") and child.Visible then
+            totalHeight = totalHeight + child.AbsoluteSize.Y
         end
+    end
+    
+    local layout = Groupbox.Container:FindFirstChildOfClass("UIListLayout")
+    if layout then
+        local count = #Groupbox.Container:GetChildren()
+        totalHeight = totalHeight + (layout.Padding.Offset * math.max(0, count - 1))
+    end
+    
+    Groupbox.Outer.Size = UDim2.new(1, 0, 0, totalHeight + 20)
+end
 
-        local StartSize = Instance.Size
-        local DragStart = Input.Position
-        local HasMoved = false
-        local Wireframe = nil
-        local ChangedConn, EndedConn
+-- 2. Title Label Width Synchronization
+local function syncTLW()
+    local cw = Groupbox.Container.AbsoluteSize.X
+    if cw > 0 then 
+        TLabel.Size = UDim2.new(0, math.max(0, cw - (4) - boxSz - (6)), 1, 0) 
+    end
+end
 
-        ChangedConn = InputService.InputChanged:Connect(function(Change)
-            if Change.UserInputType ~= Enum.UserInputType.MouseMovement and Change ~= Input then
-                return
-            end
+Groupbox.Container:GetPropertyChangedSignal('AbsoluteSize'):Connect(syncTLW)
+task.defer(syncTLW)
 
-            local Delta = Change.Position - DragStart
-            if Delta.Magnitude <= 2 then return end
-            HasMoved = true
+-- 3. Text Metrics & Font Scaling
+local function fontScale(font)
+    if font == Enum.Font.Code then return 0.9 end
+    if font == Enum.Font.RobotoMono then return 0.92 end
+    if font == Enum.Font.GothamBold then return 0.95 end
+    if font == Enum.Font.SciFi then return 0.84 end
+    if font == Enum.Font.Arcade then return 0.78 end
+    if font == Enum.Font.FredokaOne then return 0.86 end
+    if font == Enum.Font.Cartoon then return 0.88 end
+    return 1
+end
 
-            local newW = math.clamp(StartSize.X.Offset + Delta.X, MinSize.X, MaxSize.X)
-            local newH = math.clamp(StartSize.Y.Offset + Delta.Y, MinSize.Y, MaxSize.Y)
-            local newSize = UDim2.fromOffset(newW, newH)
+function Library:ApplyTextMetrics(inst)
+    if not isTextObject(inst) then return end
+    local base = self.TextBaseSizes[inst]
+    if type(base) ~= "number" then
+        base = inst.TextSize
+        if type(base) ~= "number" then return end
+        self.TextBaseSizes[inst] = base
+    end
+    local newSize = math.max(8, math.floor(base * fontScale(inst.Font) + 0.5))
+    if inst.TextSize ~= newSize then
+        inst.TextSize = newSize
+    end
+end
 
-            if Library.WireframeDrag then
-                if not Wireframe then
-                    Wireframe = Library:Create('Frame', {
-                        Size = Instance.Size,
-                        Position = Instance.Position,
-                        AnchorPoint = Instance.AnchorPoint,
-                        BackgroundTransparency = 1,
-                        Active = false,
-                        ZIndex = 100000,
-                        Parent = Library.ScreenGui,
-                    })
-                    local Stroke = Library:Create('UIStroke', {
-                        Color = Library.AccentColor,
-                        Thickness = 1,
-                        ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                        Parent = Wireframe,
-                    })
-                    Library:AddToRegistry(Stroke, {
-                        Color = 'Accent'
-                    })
-                end
-                Wireframe.Size = newSize
-                Wireframe.Position = Instance.Position
-            else
-                Instance.Size = newSize
-            end
-        end)
-
-        EndedConn = InputService.InputEnded:Connect(function(EndInput)
-            if EndInput ~= Input and EndInput.UserInputType ~= Enum.UserInputType.Touch then
-                return
-            end
-
-            if ChangedConn then ChangedConn:Disconnect() end
-            if EndedConn then EndedConn:Disconnect() end
-
-            if Library.WireframeDrag and HasMoved and Wireframe then
-                Instance.Size = Wireframe.Size
-                Wireframe:Destroy()
-                Wireframe = nil
-            end
-        end)
-    end)
-end;
+-- =========================================================================
 
 function Library:AddToolTip(InfoStr, HoverInstance)
     local X, Y = Library:GetTextBounds(InfoStr, Library.Font, Library.FontSize);
