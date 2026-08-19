@@ -1,4 +1,4 @@
--- idk
+-- GlowWare Rivals ui
 local InputService = game:GetService('UserInputService');
 local TextService = game:GetService('TextService');
 local CoreGui = game:GetService('CoreGui');
@@ -226,120 +226,51 @@ function Library:CreateLabel(Properties, IsHud)
     return Library:Create(_Instance, Properties);
 end;
 
-function Library:MakeDraggable(Instance, Cutoff, IsWindow)
-    Instance.Active = true;
-    Instance.InputBegan:Connect(function(Input)
-        if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-            local StartPos = Instance.Position
-            local DragStart = Input.Position
-
-            if (DragStart.Y - Instance.AbsolutePosition.Y) > (Cutoff or 40) then
-                return
-            end
-
-            local Dragging = true
-            local HasMoved = false
-            local Wireframe = nil
-            local ChangedConn, EndedConn
-
-            ChangedConn = InputService.InputChanged:Connect(function(Change)
-                if Change.UserInputType == Enum.UserInputType.MouseMovement or Change == Input then
-                    local Delta = Change.Position - DragStart
-                    
-                    if IsWindow and Library.WireframeDrag then
-                        if not HasMoved and Delta.Magnitude > 2 then
-                            HasMoved = true
-                            
-                            Wireframe = Library:Create("Frame", {
-                                Size = Instance.Size,
-                                Position = Instance.Position,
-                                AnchorPoint = Instance.AnchorPoint,
-                                BackgroundTransparency = 1,
-                                Active = false,
-                                ZIndex = 100000,
-                                Parent = Library.ScreenGui
-                            })
-
-                            local Stroke = Library:Create("UIStroke", {
-                                Color = Library.AccentColor,
-                                Thickness = 1,
-                                ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                                Parent = Wireframe
-                            })
-                            
-                            -- LinoriaLib uses 'Accent' as its theme registration key
-                            Library:AddToRegistry(Stroke, {
-                                Color = 'Accent'
-                            })
-                        end
-                        
-                        if HasMoved and Wireframe then
-                            Wireframe.Position = UDim2.new(
-                                StartPos.X.Scale, StartPos.X.Offset + Delta.X,
-                                StartPos.Y.Scale, StartPos.Y.Offset + Delta.Y
-                            )
-                        end
-                    else
-                        Instance.Position = UDim2.new(
-                            StartPos.X.Scale, StartPos.X.Offset + Delta.X,
-                            StartPos.Y.Scale, StartPos.Y.Offset + Delta.Y
-                        )
-                    end
-                end
-            end)
-
-            EndedConn = InputService.InputEnded:Connect(function(EndInput)
-                if EndInput == Input or EndInput.UserInputType == Enum.UserInputType.Touch then
-                    Dragging = false
-                    if ChangedConn then ChangedConn:Disconnect() end
-                    if EndedConn then EndedConn:Disconnect() end
-                    
-                    if IsWindow and Library.WireframeDrag and HasMoved and Wireframe then
-                        Instance.Position = Wireframe.Position
-                        
-                        Wireframe:Destroy()
-                        Wireframe = nil
-                    end
-                end
-            end)
-        end
-    end)
-end;
-
 -- =========================================================================
--- REPLACED RESIZE LOGIC
+-- LIBRARY UI HELPER METHODS
 -- =========================================================================
 
--- 1. Groupbox Auto-Resizing
-function GroupboxFuncs:Resize()
+-- Dynamically updates container height based on visible elements
+function Library:ResizeGroupbox(Groupbox)
+    if not Groupbox or not Groupbox.Container or not Groupbox.Outer then return end
+
     local totalHeight = 0
     for _, child in ipairs(Groupbox.Container:GetChildren()) do
         if child:IsA("GuiObject") and child.Visible then
             totalHeight = totalHeight + child.AbsoluteSize.Y
         end
     end
-    
+
     local layout = Groupbox.Container:FindFirstChildOfClass("UIListLayout")
     if layout then
-        local count = #Groupbox.Container:GetChildren()
+        local count = 0
+        for _, child in ipairs(Groupbox.Container:GetChildren()) do
+            if child:IsA("GuiObject") and child.Visible then
+                count = count + 1
+            end
+        end
         totalHeight = totalHeight + (layout.Padding.Offset * math.max(0, count - 1))
     end
-    
+
     Groupbox.Outer.Size = UDim2.new(1, 0, 0, totalHeight + 20)
 end
 
--- 2. Title Label Width Synchronization
-local function syncTLW()
-    local cw = Groupbox.Container.AbsoluteSize.X
-    if cw > 0 then 
-        TLabel.Size = UDim2.new(0, math.max(0, cw - (4) - boxSz - (6)), 1, 0) 
+-- Syncs title label width relative to container width
+function Library:SyncLabelWidth(Container, Label, BoxSize)
+    if not Container or not Label then return end
+    
+    local function sync()
+        local cw = Container.AbsoluteSize.X
+        if cw > 0 then
+            Label.Size = UDim2.new(0, math.max(0, cw - 10 - (BoxSize or 0)), 1, 0)
+        end
     end
+
+    Container:GetPropertyChangedSignal("AbsoluteSize"):Connect(sync)
+    task.defer(sync)
 end
 
-Groupbox.Container:GetPropertyChangedSignal('AbsoluteSize'):Connect(syncTLW)
-task.defer(syncTLW)
-
--- 3. Text Metrics & Font Scaling
+-- Font scaling factors
 local function fontScale(font)
     if font == Enum.Font.Code then return 0.9 end
     if font == Enum.Font.RobotoMono then return 0.92 end
@@ -351,21 +282,24 @@ local function fontScale(font)
     return 1
 end
 
+-- Scales text size dynamically based on font type
 function Library:ApplyTextMetrics(inst)
-    if not isTextObject(inst) then return end
+    if not (inst:IsA("TextLabel") or inst:IsA("TextButton") or inst:IsA("TextBox")) then return end
+
+    self.TextBaseSizes = self.TextBaseSizes or {}
     local base = self.TextBaseSizes[inst]
+
     if type(base) ~= "number" then
         base = inst.TextSize
         if type(base) ~= "number" then return end
         self.TextBaseSizes[inst] = base
     end
+
     local newSize = math.max(8, math.floor(base * fontScale(inst.Font) + 0.5))
     if inst.TextSize ~= newSize then
         inst.TextSize = newSize
     end
 end
-
--- =========================================================================
 
 function Library:AddToolTip(InfoStr, HoverInstance)
     local X, Y = Library:GetTextBounds(InfoStr, Library.Font, Library.FontSize);
