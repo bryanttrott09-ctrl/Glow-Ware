@@ -1,3 +1,4 @@
+-- GlowWare Rivals ui
 local InputService = game:GetService('UserInputService');
 local TextService = game:GetService('TextService');
 local CoreGui = game:GetService('CoreGui');
@@ -237,42 +238,41 @@ function Library:MakeDraggable(Instance, Cutoff, IsWindow)
             end
 
             local Dragging = true
-            local HasMoved = false
             local Wireframe = nil
             local ChangedConn, EndedConn
+
+            -- Create the wireframe immediately upon clicking
+            if IsWindow and Library.WireframeDrag then
+                Wireframe = Library:Create("Frame", {
+                    Size = Instance.Size,
+                    SizeConstraint = Instance.SizeConstraint,
+                    Position = Instance.Position,
+                    AnchorPoint = Instance.AnchorPoint,
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    Active = false,
+                    ZIndex = 100000,
+                    Parent = Library.ScreenGui
+                })
+
+                local Stroke = Library:Create("UIStroke", {
+                    Color = Library.AccentColor,
+                    Thickness = 1,
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                    Parent = Wireframe
+                })
+                
+                Library:AddToRegistry(Stroke, {
+                    Color = 'Accent'
+                })
+            end
 
             ChangedConn = InputService.InputChanged:Connect(function(Change)
                 if Change.UserInputType == Enum.UserInputType.MouseMovement or Change == Input then
                     local Delta = Change.Position - DragStart
                     
                     if IsWindow and Library.WireframeDrag then
-                        if not HasMoved and Delta.Magnitude > 2 then
-                            HasMoved = true
-                            
-                            Wireframe = Library:Create("Frame", {
-                                Size = Instance.Size,
-                                Position = Instance.Position,
-                                AnchorPoint = Instance.AnchorPoint,
-                                BackgroundTransparency = 1,
-                                Active = false,
-                                ZIndex = 100000,
-                                Parent = Library.ScreenGui
-                            })
-
-                            local Stroke = Library:Create("UIStroke", {
-                                Color = Library.AccentColor,
-                                Thickness = 1,
-                                ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                                Parent = Wireframe
-                            })
-                            
-                            -- LinoriaLib uses 'Accent' as its theme registration key
-                            Library:AddToRegistry(Stroke, {
-                                Color = 'Accent'
-                            })
-                        end
-                        
-                        if HasMoved and Wireframe then
+                        if Wireframe then
                             Wireframe.Position = UDim2.new(
                                 StartPos.X.Scale, StartPos.X.Offset + Delta.X,
                                 StartPos.Y.Scale, StartPos.Y.Offset + Delta.Y
@@ -293,9 +293,8 @@ function Library:MakeDraggable(Instance, Cutoff, IsWindow)
                     if ChangedConn then ChangedConn:Disconnect() end
                     if EndedConn then EndedConn:Disconnect() end
                     
-                    if IsWindow and Library.WireframeDrag and HasMoved and Wireframe then
+                    if IsWindow and Library.WireframeDrag and Wireframe then
                         Instance.Position = Wireframe.Position
-                        
                         Wireframe:Destroy()
                         Wireframe = nil
                     end
