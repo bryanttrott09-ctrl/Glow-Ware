@@ -1,3 +1,4 @@
+-GlowWare
 repeat task.wait() until game:IsLoaded()
 
 local gameId = game.GameId
