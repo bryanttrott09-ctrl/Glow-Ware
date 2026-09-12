@@ -332,7 +332,7 @@ function Library:MakeResizable(Instance, MinSize, MaxSize)
         Parent = Grip,
     })
     Library:AddToRegistry(GripIcon, {
-        TextColor3 = 'OutlineColor',
+        TextColor3 = 'AccentColor',
     })
 
     Grip.InputBegan:Connect(function(Input)
