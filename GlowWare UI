@@ -1,4 +1,4 @@
--- GlowWare ui
+-- GlowWare Rivals ui
 local InputService = game:GetService('UserInputService');
 local TextService = game:GetService('TextService');
 local CoreGui = game:GetService('CoreGui');
@@ -308,6 +308,18 @@ function Library:MakeResizable(Instance, MinSize, MaxSize)
     MinSize = MinSize or Vector2.new(400, 300)
     MaxSize = MaxSize or Vector2.new(1400, 1000)
 
+    local Grip = Library:Create('TextButton', {
+        Name = 'ResizeGrip',
+        Text = '',
+        AutoButtonColor = false,
+        BackgroundTransparency = 1,
+        Size = UDim2.fromOffset(16, 16),
+        Position = UDim2.new(1, -4, 1, -4),
+        AnchorPoint = Vector2.new(1, 1),
+        ZIndex = 25,
+        Parent = Instance,
+    })
+
 local GripIcon = Library:CreateLabel({
     BackgroundTransparency = 1,
     Size = UDim2.fromOffset(16, 16),
@@ -321,7 +333,7 @@ local GripIcon = Library:CreateLabel({
 })
 
 Library:AddToRegistry(GripIcon, {
-    TextColor3 = 'AccentColor',
+    TextColor3 = 'AccentColor', -- Line 335: Changed from 'OutlineColor'
 })
 
     Grip.InputBegan:Connect(function(Input)
@@ -3606,22 +3618,13 @@ end)
             Library:AddToRegistry(BoxInner, {
                 BackgroundColor3 = 'BackgroundColor';
             });
-local TabboxButtons = Library:Create('ScrollingFrame', {
-    BackgroundColor3 = Library.BackgroundColor,
-    BorderColor3 = Color3.new(0, 0, 0),
-    Size = UDim2.new(1, 0, 0, 20),
-    ZIndex = 5,
-    Active = true,
-    Selectable = true,
-    ScrollingDirection = Enum.ScrollingDirection.X,
-    AutomaticCanvasSize = Enum.AutomaticSize.X,
-    CanvasSize = UDim2.new(0, 0, 0, 0),
-    ScrollBarThickness = 2,
-    Parent = BoxInner,
-});
-Library:AddToRegistry(TabboxButtons, {
-    BackgroundColor3 = 'BackgroundColor';
-});;
+            local TabboxButtons = Library:Create('Frame', {
+                BackgroundTransparency = 1;
+                Position = UDim2.new(0, 0, 0, 1);
+                Size = UDim2.new(1, 0, 0, 18);
+                ZIndex = 5;
+                Parent = BoxInner;
+            });
             Library:Create('UIListLayout', {
                 FillDirection = Enum.FillDirection.Horizontal;
                 HorizontalAlignment = Enum.HorizontalAlignment.Left;
@@ -3766,16 +3769,11 @@ Library:AddToRegistry(TabboxButtons, {
             return Tab:AddTabbox({ Name = Name, Side = 2; });
         end;
 
-TabButton.InputBegan:Connect(function(input, gameProcessed)
-    -- Allow mouse wheel events to pass through to the scrolling frame instead of triggering the tab click
-    if input.UserInputType == Enum.UserInputType.MouseWheel then
-        return 
-    end
-    
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        Library:SelectTab(Tab)
-    end
-end);
+        TabButton.InputBegan:Connect(function(Input)
+            if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) then
+                Tab:ShowTab();
+            end;
+        end);
         if #TabContainer:GetChildren() == 1 then
             Tab:ShowTab();
         end;
