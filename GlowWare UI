@@ -1,4 +1,4 @@
--- GlowWare
+-- GlowWare ui
 local InputService = game:GetService('UserInputService');
 local TextService = game:GetService('TextService');
 local CoreGui = game:GetService('CoreGui');
@@ -321,7 +321,7 @@ local GripIcon = Library:CreateLabel({
 })
 
 Library:AddToRegistry(GripIcon, {
-    TextColor3 = 'AccentColor', -- Line 335: Changed from 'OutlineColor'
+    TextColor3 = 'AccentColor',
 })
 
     Grip.InputBegan:Connect(function(Input)
