@@ -320,20 +320,21 @@ function Library:MakeResizable(Instance, MinSize, MaxSize)
         Parent = Instance,
     })
 
-    local GripIcon = Library:CreateLabel({
-        BackgroundTransparency = 1,
-        Size = UDim2.fromOffset(16, 16),
-        Position = UDim2.new(1, 0, 1, 0),
-        AnchorPoint = Vector2.new(1, 1),
-        Text = '◢',
-        TextColor3 = Library.OutlineColor,
-        TextSize = Library.FontSize + 2,
-        ZIndex = 26,
-        Parent = Grip,
-    })
-    Library:AddToRegistry(GripIcon, {
-        TextColor3 = 'OutlineColor',
-    })
+local GripIcon = Library:CreateLabel({
+    BackgroundTransparency = 1,
+    Size = UDim2.fromOffset(16, 16),
+    Position = UDim2.new(1, 0, 1, 0),
+    AnchorPoint = Vector2.new(1, 1),
+    Text = '◢',
+    TextColor3 = Library.AccentColor, -- Line 329: Changed from Library.OutlineColor
+    TextSize = Library.FontSize + 2,
+    ZIndex = 26,
+    Parent = Grip,
+})
+
+Library:AddToRegistry(GripIcon, {
+    TextColor3 = 'AccentColor', -- Line 335: Changed from 'OutlineColor'
+})
 
     Grip.InputBegan:Connect(function(Input)
         if Input.UserInputType ~= Enum.UserInputType.MouseButton1
