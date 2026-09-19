@@ -33,7 +33,7 @@ local Library = {
     FontColor = Color3.fromRGB(255, 255, 255);
     MainColor = Color3.fromRGB(24, 24, 24);
     BackgroundColor = Color3.fromRGB(20, 20, 20);
-    AccentColor = Color3.fromRGB(115, 115, 115);
+    AccentColor = Color3.fromRGB(71, 119, 182);
     OutlineColor = Color3.fromRGB(31, 31, 31);
     RiskColor = Color3.fromRGB(229, 0, 0),
 
@@ -320,20 +320,21 @@ function Library:MakeResizable(Instance, MinSize, MaxSize)
         Parent = Instance,
     })
 
-    local GripIcon = Library:CreateLabel({
-        BackgroundTransparency = 1,
-        Size = UDim2.fromOffset(16, 16),
-        Position = UDim2.new(1, 0, 1, 0),
-        AnchorPoint = Vector2.new(1, 1),
-        Text = '◢',
-        TextColor3 = Library.OutlineColor,
-        TextSize = Library.FontSize + 2,
-        ZIndex = 26,
-        Parent = Grip,
-    })
-    Library:AddToRegistry(GripIcon, {
-        TextColor3 = 'OutlineColor',
-    })
+local GripIcon = Library:CreateLabel({
+    BackgroundTransparency = 1,
+    Size = UDim2.fromOffset(16, 16),
+    Position = UDim2.new(1, 0, 1, 0),
+    AnchorPoint = Vector2.new(1, 1),
+    Text = '◢',
+    TextColor3 = Library.AccentColor, -- Line 329: Changed from Library.OutlineColor
+    TextSize = Library.FontSize + 2,
+    ZIndex = 26,
+    Parent = Grip,
+})
+
+Library:AddToRegistry(GripIcon, {
+    TextColor3 = 'AccentColor', -- Line 335: Changed from 'OutlineColor'
+})
 
     Grip.InputBegan:Connect(function(Input)
         if Input.UserInputType ~= Enum.UserInputType.MouseButton1
@@ -3301,12 +3302,12 @@ task.spawn(function()
     if not MapNameLabel then return end
 
     -- Set the initial text
-    MapNameLabel.Text = "Basketball Legends"
+    MapNameLabel.Text = "RIVALS"
 
     -- Whenever the game tries to change the text, instantly set it back
     MapNameLabel:GetPropertyChangedSignal("Text"):Connect(function()
-        if MapNameLabel.Text ~= "Basketball Legends" then
-            MapNameLabel.Text = "Basketball Legends"
+        if MapNameLabel.Text ~= "RIVALS" then
+            MapNameLabel.Text = "RIVALS"
         end
     end)
 end)
