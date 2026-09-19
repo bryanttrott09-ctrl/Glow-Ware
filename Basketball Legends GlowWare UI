@@ -1,4 +1,4 @@
--- GlowWare Rivals ui
+-- GlowWare Basketball Legends ui
 local InputService = game:GetService('UserInputService');
 local TextService = game:GetService('TextService');
 local CoreGui = game:GetService('CoreGui');
